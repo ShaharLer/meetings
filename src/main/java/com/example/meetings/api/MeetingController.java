@@ -1,17 +1,12 @@
 package com.example.meetings.api;
 
-import com.example.meetings.model.Meeting;
-import com.example.meetings.model.Response;
+import com.example.meetings.model.*;
 import com.example.meetings.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -31,7 +26,7 @@ public class MeetingController {
 //        return meetingService.setMeeting(meeting);
         Meeting insertedMeeting = meetingService.setMeeting(meeting);
         String message = insertedMeeting == null ? "Failed to add the meeting" : "insertion succeeded";
-        return new Response(message, meeting);
+        return new ResponseSetMeeting(message, meeting);
     }
 
     /*
@@ -49,16 +44,18 @@ public class MeetingController {
 //    @DeleteMapping("/meetings/{fromTime}")
 //    @DeleteMapping(value = "fromTime")
 //    public void removeMeetingByStartTime(@RequestParam("fromTime") @DateTimeFormat(pattern="dd.MM.yyyy HH:mm") LocalDateTime fromTime) {
-    @DeleteMapping
+    @DeleteMapping(value = "/fromTime")
     public Response removeMeetingByStartTime(@RequestParam("fromTime") @DateTimeFormat(pattern="dd.MM.yyyy HH:mm") LocalDateTime fromTime) {
         Meeting deletedMeeting = meetingService.removeMeetingByStartTime(fromTime);
         String message = deletedMeeting == null ? "Failed to delete meeting" : "deletion succeeded";
-        return new Response(message, deletedMeeting);
+        return new ResponseRemoveMeetingByStartTime(message, deletedMeeting);
     }
 
     @DeleteMapping(value = "/title")
-    public void removeMeetingByTitle(@RequestParam("meetingTitle") String meetingTitle) {
-        meetingService.removeMeetingByTitle(meetingTitle);
+    public Response removeMeetingByTitle(@RequestParam("meetingTitle") String meetingTitle) {
+        List<Meeting> deletedMeeting = meetingService.removeMeetingByTitle(meetingTitle);
+        String message = deletedMeeting == null ? ("Failed to delete meetings with title" + meetingTitle) : "deletion succeeded";
+        return new ResponseRemoveMeetingByTitle(message, deletedMeeting);
     }
 
     @GetMapping
@@ -67,7 +64,9 @@ public class MeetingController {
     }
 
     @PutMapping
-    public Meeting getNextMeeting() {
-        return meetingService.getNextMeeting();
+    public ResponseGetNextMeeting getNextMeeting() {
+        Meeting nextMeeting = meetingService.getNextMeeting();
+        String message = nextMeeting == null ? "There is no next meeting" : "The next meetings is:";
+        return new ResponseGetNextMeeting(message, nextMeeting);
     }
 }

@@ -3,12 +3,13 @@ package com.example.meetings.model;
 public class Response {
 
     private String message;
-    private Meeting meeting;
+//    private Meeting meeting;
 
-    public Response() {
+    public Response(String message) {
 
     }
 
+    /*
     public Response(Meeting meeting) {
         this.meeting = meeting;
     }
@@ -18,6 +19,8 @@ public class Response {
         this.meeting = meeting;
     }
 
+     */
+
     public String getMessage() {
         return message;
     }
@@ -26,6 +29,7 @@ public class Response {
         this.message = message;
     }
 
+    /*
     public Meeting getMeeting() {
         return meeting;
     }
@@ -33,4 +37,6 @@ public class Response {
     public void setMeeting(Meeting meeting) {
         this.meeting = meeting;
     }
+
+     */
 }
