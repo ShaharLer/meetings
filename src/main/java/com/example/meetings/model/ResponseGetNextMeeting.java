@@ -2,18 +2,18 @@ package com.example.meetings.model;
 
 public class ResponseGetNextMeeting extends Response {
 
-    private Meeting nextMeeting;
+    private Meeting meeting;
 
-    public ResponseGetNextMeeting(String message, Meeting nextMeeting) {
+    public ResponseGetNextMeeting(String message, Meeting meeting) {
         super(message);
-        this.nextMeeting = nextMeeting;
+        this.meeting = meeting;
     }
 
-    public Meeting getNextMeeting() {
-        return nextMeeting;
+    public Meeting getMeeting() {
+        return meeting;
     }
 
-    public void setNextMeeting(Meeting nextMeeting) {
-        this.nextMeeting = nextMeeting;
+    public void setMeeting(Meeting meeting) {
+        this.meeting = meeting;
     }
 }

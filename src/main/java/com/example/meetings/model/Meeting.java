@@ -10,23 +10,14 @@ import java.util.Date;
 
 public class Meeting {
 
-    @JsonFormat(pattern="dd.MM.yyyy HH:mm")
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     private LocalDateTime fromTime;
-    @JsonFormat(pattern="dd.MM.yyyy HH:mm")
+    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
     private LocalDateTime toTime;
     private String meetingTitle;
 
     public Meeting() {
     }
-
-    /*
-    public Meeting(LocalDateTime fromTime, LocalDateTime toTime, String meetingTitle) {
-        this.fromTime = fromTime;
-        this.toTime = toTime;
-        this.meetingTitle = meetingTitle;
-    }
-
-     */
 
     public LocalDateTime getFromTime() {
         return fromTime;
@@ -51,11 +42,4 @@ public class Meeting {
     public void setMeetingTitle(String meetingTitle) {
         this.meetingTitle = meetingTitle;
     }
-
-    /*
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
-     */
 }

@@ -2,19 +2,19 @@ package com.example.meetings.model;
 
 public class ResponseRemoveMeetingByStartTime extends Response {
 
-    private Meeting deletedMeeting;
+    private Meeting meeting;
 
     public ResponseRemoveMeetingByStartTime(String message, Meeting addedMeeting) {
         super(message);
-        this.deletedMeeting = addedMeeting;
+        this.meeting = addedMeeting;
     }
 
-    public Meeting getAddedMeeting() {
-        return deletedMeeting;
+    public Meeting getMeeting() {
+        return meeting;
     }
 
-    public void setAddedMeeting(Meeting addedMeeting) {
-        this.deletedMeeting = addedMeeting;
+    public void setMeeting(Meeting addedMeeting) {
+        this.meeting = addedMeeting;
     }
 
 }

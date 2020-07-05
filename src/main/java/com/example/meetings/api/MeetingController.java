@@ -21,52 +21,39 @@ public class MeetingController {
     }
 
     @PostMapping
-    @ResponseBody
     public Response setMeeting(@RequestBody Meeting meeting) {
-//        return meetingService.setMeeting(meeting);
         Meeting insertedMeeting = meetingService.setMeeting(meeting);
-        String message = insertedMeeting == null ? "Failed to add the meeting" : "insertion succeeded";
+        String message = insertedMeeting == null ? "Failed to add the following meeting:"
+                                                 : "Successfully inserted the following meeting:";
         return new ResponseSetMeeting(message, meeting);
     }
 
-    /*
-    @PostMapping
-    public void setMeeting2(@RequestParam("fromTime") @DateTimeFormat(pattern="dd-MM-yyyy HH:mm") Date fromTime,
-                           @RequestParam("toTime") @DateTimeFormat(pattern="dd-MM-yyyy HH:mm") Date toTime,
-                           @RequestParam("meetingTitle") String meetingTitle) {
-        meetingService.setMeeting(fromTime, toTime, meetingTitle);
-    }
-     */
-
-//    public void removeMeetingByStartTime(@PathVariable("fromTime") @DateTimeFormat(pattern="dd-MM-yyyy,HH:mm") Date fromTime) {
-//    @DeleteMapping public void removeMeetingByStartTime(@RequestBody Meeting meeting) {
-
-//    @DeleteMapping("/meetings/{fromTime}")
-//    @DeleteMapping(value = "fromTime")
-//    public void removeMeetingByStartTime(@RequestParam("fromTime") @DateTimeFormat(pattern="dd.MM.yyyy HH:mm") LocalDateTime fromTime) {
-    @DeleteMapping(value = "/fromTime")
-    public Response removeMeetingByStartTime(@RequestParam("fromTime") @DateTimeFormat(pattern="dd.MM.yyyy HH:mm") LocalDateTime fromTime) {
+    @DeleteMapping(value = "/fromTime/{time}")
+        public Response removeMeetingByStartTime(@PathVariable("time") @DateTimeFormat(pattern="dd-MM-yyyy HH:mm") LocalDateTime fromTime) {
         Meeting deletedMeeting = meetingService.removeMeetingByStartTime(fromTime);
-        String message = deletedMeeting == null ? "Failed to delete meeting" : "deletion succeeded";
+        String message = deletedMeeting == null ? "Failed to delete a meeting that starts at " + fromTime
+                                                : "Successfully deleted the following meeting:";
         return new ResponseRemoveMeetingByStartTime(message, deletedMeeting);
     }
 
-    @DeleteMapping(value = "/title")
-    public Response removeMeetingByTitle(@RequestParam("meetingTitle") String meetingTitle) {
+    @DeleteMapping(value = "/title/{meetingTitle}")
+    public Response removeMeetingByTitle(@PathVariable("meetingTitle") String meetingTitle) {
         List<Meeting> deletedMeeting = meetingService.removeMeetingByTitle(meetingTitle);
-        String message = deletedMeeting == null ? ("Failed to delete meetings with title" + meetingTitle) : "deletion succeeded";
+        String message = deletedMeeting.isEmpty() ? ("Failed to delete meetings with title: " + meetingTitle)
+                                                  : "Successfully deleted the following meetings with title: " + meetingTitle;
         return new ResponseRemoveMeetingByTitle(message, deletedMeeting);
     }
 
-    @GetMapping
-    public List<Meeting> getAllMeetings() {
-        return meetingService.getAllMeetings();
-    }
-
-    @PutMapping
+    @GetMapping("/meetings/next")
     public ResponseGetNextMeeting getNextMeeting() {
         Meeting nextMeeting = meetingService.getNextMeeting();
         String message = nextMeeting == null ? "There is no next meeting" : "The next meetings is:";
         return new ResponseGetNextMeeting(message, nextMeeting);
+    }
+
+    @GetMapping("/meetings/all")
+    public List<Meeting> getAllMeetings() {
+        List<Meeting> allMeetings = meetingService.getAllMeetings();
+        return allMeetings;
     }
 }

@@ -15,7 +15,7 @@ public class MeetingService {
     private final MeetingDao meetingDao;
 
     @Autowired
-    public MeetingService(@Qualifier("meetingDao") MeetingDao meetingDao) {
+    public MeetingService(@Qualifier("meetingsDao") MeetingDao meetingDao) {
         this.meetingDao = meetingDao;
     }
 
@@ -24,21 +24,18 @@ public class MeetingService {
     }
 
     public Meeting removeMeetingByStartTime(LocalDateTime fromTime) {
-        Meeting deletedMeeting = meetingDao.removeMeetingByStartTime(fromTime);
-        return deletedMeeting;
+        return meetingDao.removeMeetingByStartTime(fromTime);
     }
 
     public List<Meeting> removeMeetingByTitle(String meetingTitle) {
-        List<Meeting> deletedMeetings = meetingDao.removeMeetingByTitle(meetingTitle);
-        return deletedMeetings;
+        return meetingDao.removeMeetingByTitle(meetingTitle);
+    }
+
+    public Meeting getNextMeeting() {
+        return meetingDao.getNextMeeting();
     }
 
     public List<Meeting> getAllMeetings() {
         return meetingDao.selectAllMeetings();
-    }
-
-    public Meeting getNextMeeting() {
-        Meeting meeting = meetingDao.getNextMeeting();
-        return meeting;
     }
 }
