@@ -1,10 +1,10 @@
 package com.example.meetings.model.Exceptions;
 
-import com.example.meetings.model.Constants.ExceptionsConstants;
-
 public class MeetingNotFoundByTitleException extends RuntimeException {
 
+    private static final String MEETING_NOT_FOUND_BY_TITLE_ERROR = "Cannot find a meeting with the title \"%s\"";
+
     public MeetingNotFoundByTitleException(String meetingTitle) {
-        super(ExceptionsConstants.getMeetingNotFoundByTitleError(meetingTitle));
+        super(String.format(MEETING_NOT_FOUND_BY_TITLE_ERROR, meetingTitle));
     }
 }

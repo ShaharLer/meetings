@@ -1,10 +1,10 @@
 package com.example.meetings.model.Exceptions;
 
-import com.example.meetings.model.Constants.ExceptionsConstants;
-
 public class StartEndTimesInvalidException extends MeetingInvalidException {
 
+    private static final String MEETING_START_END_TIMES_INVALID_ERROR = "fromTime cannot be after toTime";
+
     public StartEndTimesInvalidException() {
-        super(ExceptionsConstants.getMeetingStartEndTimesInvalidError());
+        super(MEETING_START_END_TIMES_INVALID_ERROR);
     }
 }

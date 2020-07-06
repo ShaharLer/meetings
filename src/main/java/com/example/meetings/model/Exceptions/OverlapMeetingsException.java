@@ -1,10 +1,11 @@
 package com.example.meetings.model.Exceptions;
 
-import com.example.meetings.model.Constants.ExceptionsConstants;
-
 public class OverlapMeetingsException extends MeetingInvalidException {
 
+    // TODO add the overlapped meeting
+    private static final String MEETINGS_OVERLAP_ERROR = "The meeting you are trying to insert overlaps with another meeting";
+
     public OverlapMeetingsException() {
-        super(ExceptionsConstants.getMeetingsOverlapError());
+        super(MEETINGS_OVERLAP_ERROR);
     }
 }

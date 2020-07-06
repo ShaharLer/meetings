@@ -1,16 +1,16 @@
 package com.example.meetings.model.Responses;
 
-import com.example.meetings.model.Constants.ResponseConstants;
 import com.example.meetings.model.Meeting;
 
 import java.util.List;
 
 public class RemoveMeetingByTitleResponse extends Response {
 
+    private static final String DELETED_MEETINGS_BY_TITLE_MESSAGE = "The meetings with title \"%s\" were deleted successfully";
     private List<Meeting> deletedMeetings;
 
     public RemoveMeetingByTitleResponse(String meetingsTitle, List<Meeting> deletedMeetings) {
-        super(ResponseConstants.getDeletedMeetingsByTitleMessage(meetingsTitle));
+        super(String.format(DELETED_MEETINGS_BY_TITLE_MESSAGE, meetingsTitle));
         this.deletedMeetings = deletedMeetings;
     }
 

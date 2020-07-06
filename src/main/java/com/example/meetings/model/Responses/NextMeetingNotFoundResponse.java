@@ -1,10 +1,10 @@
 package com.example.meetings.model.Responses;
 
-import com.example.meetings.model.Constants.ResponseConstants;
-
 public class NextMeetingNotFoundResponse extends Response {
 
+    private static final String NEXT_MEETING_NOT_FOUND_MESSAGE = "There is no meeting coming next";
+
     public NextMeetingNotFoundResponse() {
-        super(ResponseConstants.getNextMeetingNotFoundMessage());
+        super(NEXT_MEETING_NOT_FOUND_MESSAGE);
     }
 }
