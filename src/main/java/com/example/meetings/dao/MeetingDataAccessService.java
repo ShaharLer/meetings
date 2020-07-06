@@ -1,140 +1,78 @@
 package com.example.meetings.dao;
 
+import com.example.meetings.model.Exceptions.*;
 import com.example.meetings.model.Meeting;
+import com.example.meetings.model.Utils;
 import org.springframework.stereotype.Repository;
 
-import java.time.DayOfWeek;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Repository("meetingsDao")
 public class MeetingDataAccessService implements MeetingDao {
 
-    private static final int MINIMUM_MEETING_TIME = 15; // TODO check how to use static folder
-    private static final int MAXIMUM_MEETING_TIME = 120; // TODO check how to use static folder
-    private static final int MAXIMUM_DAILY_MEETINGS_HOURS_DIFF = 10; // TODO check how to use static folder
-    private static final int MAXIMUM_WEEKLY_MEETINGS_HOURS = 40; // TODO check how to use static folder
     private final SortedMap<LocalDate, SortedMap<LocalDateTime, Meeting>> allMeetings = new TreeMap<>();
     private final Map<String, List<LocalDateTime>> titleToMeetingsStartingTimes = new HashMap<>();
 
     @Override
     public Meeting setMeeting(Meeting meeting) {
-        if (!isMeetingValid(meeting)) {
-            return null;
-        }
+        verifyMeetingIsValid(meeting);
         addMeeting(meeting);
         return meeting;
     }
 
-    private boolean isMeetingValid(Meeting meeting) {
-        if (!isSingleMeetingRequirementsValid(meeting)) {
-            return false;
-        }
-        if (!isScheduleRequirementsValid(meeting)) {
-            return false;
-        }
-        return true;
+    private void verifyMeetingIsValid(Meeting meeting) {
+        verifySingleMeetingRequirements(meeting);
+        verifyScheduleRequirements(meeting);
     }
 
-    private boolean isSingleMeetingRequirementsValid(Meeting meeting) {
-        LocalDateTime fromTime = meeting.getFromTime();
-        LocalDateTime toTime = meeting.getToTime();
-        int meetingDurationInMinutes = getMeetingDurationInMinutes(meeting);
+    private void verifySingleMeetingRequirements(Meeting meeting)
+            throws StartEndTimesInvalidException, DurationException, CrossDaysException, SaturdayException {
 
         // Check that start time is not after end time
-        if (fromTime.isAfter(toTime)) {
-            return false;
+        if (!Utils.isStartEndTimesValid(meeting)) {
+            throw new StartEndTimesInvalidException();
         }
-        //  Requirement (1): A meeting cannot last for more than 2 hours, and for less than 15 minutes
-        if (meetingDurationInMinutes > MAXIMUM_MEETING_TIME || meetingDurationInMinutes < MINIMUM_MEETING_TIME) {
-            return false;
+        //  Requirement (1)
+        if (!Utils.isMeetingDurationValid(meeting)) {
+            throw new DurationException();
         }
         // Assumption: No cross-days meetings
-        if (fromTime.getDayOfWeek() != toTime.getDayOfWeek()) {
-            return false;
+        if (Utils.isCrossDaysMeeting(meeting)) {
+            throw new CrossDaysException();
         }
-        // Requirement (3): No meetings on Saturdays
-        if (fromTime.getDayOfWeek() == DayOfWeek.SATURDAY) {
-            return false;
+        // Requirement (3)
+        if (Utils.isMeetingOnSaturday(meeting)) {
+            throw new SaturdayException();
         }
-        return true;
     }
 
-    private boolean isScheduleRequirementsValid(Meeting newMeeting) {
+    private void verifyScheduleRequirements(Meeting newMeeting)
+            throws OverlapMeetingsException, DailyRequirementsException, WeeklyRequirementsException {
+
         LocalDateTime[] sameDayMeetingsRange = {newMeeting.getFromTime(), newMeeting.getToTime()};
-        LocalDate weekStartDate = getWeekStartDate(newMeeting.getFromTime());
-        int totalWeekMeetingsInMinutes = updateTotalWeekMeetingsInMinutes(0, newMeeting);
+        LocalDate weekStartDate = Utils.getWeekStartDate(newMeeting.getFromTime());
+        int totalWeekMeetingsInMinutes = Utils.updateTotalWeekMeetingsInMinutes(0, newMeeting);
 
         if (allMeetings.containsKey(weekStartDate)) {
             List<Meeting> meetingsOfTheWeek = new ArrayList<>(allMeetings.get(weekStartDate).values());
             for (Meeting existedMeeting : meetingsOfTheWeek) { // Run on the weekly meetings
                 // Requirement (2): Two meetings cannot overlap
-                if (meetingsOverlap(newMeeting, existedMeeting)) {
-                    return false;
+                if (Utils.meetingsOverlap(newMeeting, existedMeeting)) {
+                    throw new OverlapMeetingsException();
                 }
-                updateSameDayMeetingsRange(newMeeting, existedMeeting, sameDayMeetingsRange);
-                totalWeekMeetingsInMinutes = updateTotalWeekMeetingsInMinutes(totalWeekMeetingsInMinutes, existedMeeting);
+                Utils.updateMeetingsRangeOfDay(newMeeting, existedMeeting, sameDayMeetingsRange);
+                totalWeekMeetingsInMinutes =
+                        Utils.updateTotalWeekMeetingsInMinutes(totalWeekMeetingsInMinutes, existedMeeting);
             }
-            if (!isDailyRequirementsValid(newMeeting, sameDayMeetingsRange)) {
-                return false;
+            if (!Utils.isDailyRequirementsValid(newMeeting, sameDayMeetingsRange)) {
+                throw new DailyRequirementsException();
             }
-            if (!isWeeklyRequirementsValid(totalWeekMeetingsInMinutes)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private LocalDate getWeekStartDate(LocalDateTime meetingStart) {
-        LocalDate weekStartDate = meetingStart.toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        return weekStartDate;
-    }
-
-    private int updateTotalWeekMeetingsInMinutes(int totalWeekMeetingsInMinutes, Meeting meeting) {
-        return (totalWeekMeetingsInMinutes + getMeetingDurationInMinutes(meeting));
-    }
-
-    private int getMeetingDurationInMinutes(Meeting meeting) {
-        return (int)Duration.between(meeting.getFromTime(), meeting.getToTime()).toMinutes();
-    }
-
-    private boolean meetingsOverlap(Meeting newMeeting, Meeting existedMeeting) {
-        return (newMeeting.getFromTime().isBefore(existedMeeting.getToTime()) &&
-                existedMeeting.getFromTime().isBefore(newMeeting.getToTime()));
-    }
-
-    private void updateSameDayMeetingsRange(Meeting newMeeting, Meeting existedMeeting, LocalDateTime[] sameDayMeetingsRange) {
-        LocalDate newMeetingDate = newMeeting.getFromTime().toLocalDate();
-        LocalDate existedMeetingDate = existedMeeting.getFromTime().toLocalDate();
-
-        if (newMeetingDate.equals(existedMeetingDate)) {
-            LocalDateTime fromTime = existedMeeting.getFromTime();
-            LocalDateTime toTime = existedMeeting.getToTime();
-
-            if (fromTime.isBefore(sameDayMeetingsRange[0])) {
-                sameDayMeetingsRange[0] = fromTime;
-            }
-            if (toTime.isAfter(sameDayMeetingsRange[1])) {
-                sameDayMeetingsRange[1] = toTime;
+            if (!Utils.isWeeklyRequirementsValid(totalWeekMeetingsInMinutes)) {
+                throw new WeeklyRequirementsException();
             }
         }
-    }
-
-    private boolean isDailyRequirementsValid(Meeting meeting, LocalDateTime[] sameDayMeetingsRange) {
-        // Requirement (6): The last meeting on the same day must end up to 10 hours after the first meeting started
-        int diffFromFirstMeetingStart = (int) Math.abs(Duration.between(meeting.getToTime(), sameDayMeetingsRange[0]).toMinutes());
-        int diffFromLastMeetingEnd = (int) Math.abs(Duration.between(meeting.getFromTime(), sameDayMeetingsRange[1]).toMinutes());
-        int maximumDailyMeetingsMinutes = MAXIMUM_DAILY_MEETINGS_HOURS_DIFF * 60;
-        return ((diffFromFirstMeetingStart <= maximumDailyMeetingsMinutes) &&
-                (diffFromLastMeetingEnd <= maximumDailyMeetingsMinutes));
-    }
-
-    private boolean isWeeklyRequirementsValid(int totalWeekMeetingsHours) {
-        // Requirement (5): There are up to 40 working hours a week (Sunday to Friday)
-        return (totalWeekMeetingsHours <= MAXIMUM_WEEKLY_MEETINGS_HOURS * 60);
     }
 
     private void addMeeting(Meeting meeting) {
@@ -143,7 +81,7 @@ public class MeetingDataAccessService implements MeetingDao {
     }
 
     private void addMeetingToMeetingsMap(Meeting meeting) {
-        LocalDate weekStartDate = getWeekStartDate(meeting.getFromTime());
+        LocalDate weekStartDate = Utils.getWeekStartDate(meeting.getFromTime());
         if (!allMeetings.containsKey(weekStartDate)) {
             allMeetings.put(weekStartDate, new TreeMap<>());
         }
@@ -159,33 +97,21 @@ public class MeetingDataAccessService implements MeetingDao {
     }
 
     @Override
-    public Meeting removeMeetingByStartTime(LocalDateTime fromTime) {
-        Meeting meetingToRemove = removeMeetingFromMeetingsMap(fromTime);
-        removeMeetingKeyFromTitlesMap(meetingToRemove);
-        return meetingToRemove;
-    }
-
-    @Override
-    public List<Meeting> removeMeetingByTitle(String meetingTitle) {
-        List<Meeting> deletedMeetings = new ArrayList<>();
-        if (titleToMeetingsStartingTimes.get(meetingTitle) != null) {
-            for (LocalDateTime fromTime : titleToMeetingsStartingTimes.get(meetingTitle)) {
-                Meeting deletedMeeting = removeMeetingFromMeetingsMap(fromTime);
-                deletedMeetings.add(deletedMeeting);
-            }
-            titleToMeetingsStartingTimes.remove(meetingTitle);
+    public Meeting removeMeetingByStartTime(LocalDateTime fromTime) throws MeetingNotFoundByTimeException {
+        Meeting removedMeeting = removeMeetingFromMeetingsMap(fromTime);
+        if (removedMeeting == null) {
+            throw new MeetingNotFoundByTimeException(fromTime);
         }
-        return deletedMeetings;
+        removeMeetingKeyFromTitlesMap(removedMeeting);
+        return removedMeeting;
     }
 
     private Meeting removeMeetingFromMeetingsMap(LocalDateTime fromTime) {
         Meeting deletedMeeting = null;
-        LocalDate weekStart = getWeekStartDate(fromTime);
-        Map<LocalDateTime, Meeting> weekMeetings = allMeetings.get(weekStart);
-
-        if (weekMeetings != null) {
-            deletedMeeting = weekMeetings.get(fromTime);
-            weekMeetings.remove(fromTime);
+        LocalDate weekStart = Utils.getWeekStartDate(fromTime);
+        if (allMeetings.containsKey(weekStart)) {
+            Map<LocalDateTime, Meeting> weekMeetings = allMeetings.get(weekStart);
+            deletedMeeting = weekMeetings.remove(fromTime);
             if (weekMeetings.isEmpty()) {
                 allMeetings.remove(weekStart);
             }
@@ -204,31 +130,30 @@ public class MeetingDataAccessService implements MeetingDao {
     }
 
     @Override
+    public List<Meeting> removeMeetingByTitle(String meetingTitle) throws MeetingNotFoundByTitleException {
+        List<Meeting> deletedMeetings = new ArrayList<>();
+        if (titleToMeetingsStartingTimes.get(meetingTitle) != null) {
+            for (LocalDateTime fromTime : titleToMeetingsStartingTimes.get(meetingTitle)) {
+                deletedMeetings.add(removeMeetingFromMeetingsMap(fromTime));
+            }
+            titleToMeetingsStartingTimes.remove(meetingTitle);
+        }
+        if (deletedMeetings.isEmpty()) {
+            throw new MeetingNotFoundByTitleException(meetingTitle);
+        }
+        return deletedMeetings;
+    }
+
+    @Override
     public Meeting getNextMeeting() {
         LocalDateTime now = LocalDateTime.now();
         List<LocalDate> weeksStartList = new ArrayList<>(allMeetings.keySet());
-        int weekStartIndexToSearch = weeksBinarySearch(weeksStartList, getWeekStartDate(now));
+        int weekStartIndexToSearch = Utils.weeksBinarySearch(weeksStartList, Utils.getWeekStartDate(now));
         Meeting meeting = searchNextMeeting(weeksStartList, weekStartIndexToSearch, now);
         if (meeting == null) {
             meeting = searchNextMeeting(weeksStartList, weekStartIndexToSearch + 1, now);
         }
         return meeting;
-    }
-
-    private int weeksBinarySearch(List<LocalDate> weeksStartingDays, LocalDate weekStartDate) {
-        int start = 0;
-        int end = weeksStartingDays.size() - 1;
-        while (start <= end) {
-            int middle = start + ((end - start) / 2);
-            if (weekStartDate.isEqual(weeksStartingDays.get(middle))) {
-                return middle;
-            } else if (weekStartDate.isAfter(weeksStartingDays.get(middle))) {
-                start = middle + 1;
-            } else {
-                end = middle - 1;
-            }
-        }
-        return start; // returns the next week with a meeting (out of bounds if no future meetings exist)
     }
 
     private Meeting searchNextMeeting(List<LocalDate> weeksStartList, int index, LocalDateTime now) {

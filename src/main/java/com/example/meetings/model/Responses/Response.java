@@ -1,4 +1,4 @@
-package com.example.meetings.model;
+package com.example.meetings.model.Responses;
 
 public class Response {
 
