@@ -1,9 +1,10 @@
 package com.example.meetings.api;
 
-import com.example.meetings.model.*;
 import com.example.meetings.model.Exceptions.MeetingInvalidException;
 import com.example.meetings.model.Exceptions.MeetingNotFoundByTimeException;
 import com.example.meetings.model.Exceptions.MeetingNotFoundByTitleException;
+import com.example.meetings.model.Meeting;
+import com.example.meetings.model.MeetingConstants;
 import com.example.meetings.model.Responses.*;
 import com.example.meetings.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
-@RequestMapping("/meetings")
+@RequestMapping("/meeting")
 public class MeetingController {
 
     private final MeetingService meetingService;
@@ -29,18 +29,23 @@ public class MeetingController {
     @PostMapping
     public Response setMeeting(@RequestBody Meeting meeting) {
         try {
-            return new SetMeetingResponse(meetingService.setMeeting(meeting));
+            Meeting addedMeeting = meetingService.setMeeting(meeting);
+            return new SetMeetingResponse(addedMeeting);
         } catch (MeetingInvalidException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @DeleteMapping(value = "/fromTime/{time}")
-    public Response removeMeetingByStartTime(@PathVariable("time") @DateTimeFormat(pattern="dd-MM-yyyy HH:mm") LocalDateTime fromTime) {
+    public Response removeMeetingByStartTime(@PathVariable("time") @DateTimeFormat(pattern = MeetingConstants.MEETING_TIME_PATTERN) LocalDateTime fromTime) {
         try {
             return new RemoveMeetingByStartTimeResponse(meetingService.removeMeetingByStartTime(fromTime));
         } catch (MeetingNotFoundByTimeException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
@@ -50,6 +55,8 @@ public class MeetingController {
             return new RemoveMeetingByTitleResponse(meetingTitle, meetingService.removeMeetingByTitle(meetingTitle));
         } catch (MeetingNotFoundByTitleException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
@@ -63,9 +70,12 @@ public class MeetingController {
         }
     }
 
+    /*
     @GetMapping("/all")
     public List<Meeting> getAllMeetings() {
         List<Meeting> allMeetings = meetingService.getAllMeetings();
         return allMeetings;
     }
+
+     */
 }

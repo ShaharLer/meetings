@@ -3,12 +3,13 @@ package com.example.meetings.dao;
 import com.example.meetings.model.Meeting;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 public interface MeetingDao {
 
-   Meeting setMeeting(Meeting meeting);
+   List<Meeting> getWeeklyMeetings(Meeting meeting);
+
+   boolean setMeeting(Meeting meeting);
 
    Meeting removeMeetingByStartTime(LocalDateTime fromTime);
 
@@ -16,5 +17,5 @@ public interface MeetingDao {
 
    Meeting getNextMeeting();
 
-   List<Meeting> selectAllMeetings();
+//   List<Meeting> selectAllMeetings();
 }

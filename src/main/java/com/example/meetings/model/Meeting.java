@@ -10,9 +10,9 @@ import java.util.Date;
 
 public class Meeting {
 
-    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
+    @JsonFormat(pattern = MeetingConstants.MEETING_TIME_PATTERN)
     private LocalDateTime fromTime;
-    @JsonFormat(pattern="dd-MM-yyyy HH:mm")
+    @JsonFormat(pattern = MeetingConstants.MEETING_TIME_PATTERN)
     private LocalDateTime toTime;
     private String meetingTitle;
 

@@ -1,6 +1,5 @@
 package com.example.meetings.dao;
 
-import com.example.meetings.model.Exceptions.*;
 import com.example.meetings.model.Meeting;
 import com.example.meetings.model.Utils;
 import org.springframework.stereotype.Repository;
@@ -10,74 +9,25 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository("meetingsDao")
-public class MeetingDataAccessService implements MeetingDao {
+public class MeetingDaoImpl implements MeetingDao {
 
     private final SortedMap<LocalDate, SortedMap<LocalDateTime, Meeting>> allMeetings = new TreeMap<>();
     private final Map<String, List<LocalDateTime>> titleToMeetingsStartingTimes = new HashMap<>();
 
     @Override
-    public Meeting setMeeting(Meeting meeting) {
-        verifyMeetingIsValid(meeting);
-        addMeeting(meeting);
-        return meeting;
-    }
-
-    private void verifyMeetingIsValid(Meeting meeting) {
-        verifySingleMeetingRequirements(meeting);
-        verifyScheduleRequirements(meeting);
-    }
-
-    private void verifySingleMeetingRequirements(Meeting meeting)
-            throws StartEndTimesInvalidException, DurationException, CrossDaysException, SaturdayException {
-
-        // Check that start time is not after end time
-        if (!Utils.isStartEndTimesValid(meeting)) {
-            throw new StartEndTimesInvalidException();
-        }
-        //  Requirement (1)
-        if (!Utils.isMeetingDurationValid(meeting)) {
-            throw new DurationException();
-        }
-        // Assumption: No cross-days meetings
-        if (Utils.isCrossDaysMeeting(meeting)) {
-            throw new CrossDaysException();
-        }
-        // Requirement (3)
-        if (Utils.isMeetingOnSaturday(meeting)) {
-            throw new SaturdayException();
-        }
-    }
-
-    private void verifyScheduleRequirements(Meeting newMeeting)
-            throws OverlapMeetingsException, DailyRequirementsException, WeeklyRequirementsException {
-
-        LocalDateTime[] sameDayMeetingsRange = {newMeeting.getFromTime(), newMeeting.getToTime()};
-        LocalDate weekStartDate = Utils.getWeekStartDate(newMeeting.getFromTime());
-        int totalWeekMeetingsInMinutes = Utils.updateTotalWeekMeetingsInMinutes(0, newMeeting);
-
+    public List<Meeting> getWeeklyMeetings(Meeting meeting) {
+        LocalDate weekStartDate = Utils.getWeekStartDate(meeting.getFromTime());
         if (allMeetings.containsKey(weekStartDate)) {
-            List<Meeting> meetingsOfTheWeek = new ArrayList<>(allMeetings.get(weekStartDate).values());
-            for (Meeting existedMeeting : meetingsOfTheWeek) { // Run on the weekly meetings
-                // Requirement (2): Two meetings cannot overlap
-                if (Utils.meetingsOverlap(newMeeting, existedMeeting)) {
-                    throw new OverlapMeetingsException();
-                }
-                Utils.updateMeetingsRangeOfDay(newMeeting, existedMeeting, sameDayMeetingsRange);
-                totalWeekMeetingsInMinutes =
-                        Utils.updateTotalWeekMeetingsInMinutes(totalWeekMeetingsInMinutes, existedMeeting);
-            }
-            if (!Utils.isDailyRequirementsValid(newMeeting, sameDayMeetingsRange)) {
-                throw new DailyRequirementsException();
-            }
-            if (!Utils.isWeeklyRequirementsValid(totalWeekMeetingsInMinutes)) {
-                throw new WeeklyRequirementsException();
-            }
+            return new ArrayList<>(allMeetings.get(weekStartDate).values());
         }
+        return null;
     }
 
-    private void addMeeting(Meeting meeting) {
+    @Override
+    public boolean setMeeting(Meeting meeting) {
         addMeetingToMeetingsMap(meeting);
         addMeetingToTitlesMap(meeting);
+        return true;
     }
 
     private void addMeetingToMeetingsMap(Meeting meeting) {
@@ -97,12 +47,11 @@ public class MeetingDataAccessService implements MeetingDao {
     }
 
     @Override
-    public Meeting removeMeetingByStartTime(LocalDateTime fromTime) throws MeetingNotFoundByTimeException {
+    public Meeting removeMeetingByStartTime(LocalDateTime fromTime) {
         Meeting removedMeeting = removeMeetingFromMeetingsMap(fromTime);
-        if (removedMeeting == null) {
-            throw new MeetingNotFoundByTimeException(fromTime);
+        if (removedMeeting != null) {
+            removeMeetingKeyFromTitlesMap(removedMeeting);
         }
-        removeMeetingKeyFromTitlesMap(removedMeeting);
         return removedMeeting;
     }
 
@@ -130,16 +79,13 @@ public class MeetingDataAccessService implements MeetingDao {
     }
 
     @Override
-    public List<Meeting> removeMeetingByTitle(String meetingTitle) throws MeetingNotFoundByTitleException {
+    public List<Meeting> removeMeetingByTitle(String meetingTitle) {
         List<Meeting> deletedMeetings = new ArrayList<>();
         if (titleToMeetingsStartingTimes.get(meetingTitle) != null) {
             for (LocalDateTime fromTime : titleToMeetingsStartingTimes.get(meetingTitle)) {
                 deletedMeetings.add(removeMeetingFromMeetingsMap(fromTime));
             }
             titleToMeetingsStartingTimes.remove(meetingTitle);
-        }
-        if (deletedMeetings.isEmpty()) {
-            throw new MeetingNotFoundByTitleException(meetingTitle);
         }
         return deletedMeetings;
     }
@@ -148,12 +94,28 @@ public class MeetingDataAccessService implements MeetingDao {
     public Meeting getNextMeeting() {
         LocalDateTime now = LocalDateTime.now();
         List<LocalDate> weeksStartList = new ArrayList<>(allMeetings.keySet());
-        int weekStartIndexToSearch = Utils.weeksBinarySearch(weeksStartList, Utils.getWeekStartDate(now));
+        int weekStartIndexToSearch = binarySearchOnWeekStarts(weeksStartList, Utils.getWeekStartDate(now));
         Meeting meeting = searchNextMeeting(weeksStartList, weekStartIndexToSearch, now);
         if (meeting == null) {
             meeting = searchNextMeeting(weeksStartList, weekStartIndexToSearch + 1, now);
         }
         return meeting;
+    }
+
+    public static int binarySearchOnWeekStarts(List<LocalDate> weeksStartingDays, LocalDate weekStartDate) {
+        int start = 0;
+        int end = weeksStartingDays.size() - 1;
+        while (start <= end) {
+            int middle = start + ((end - start) / 2);
+            if (weekStartDate.isEqual(weeksStartingDays.get(middle))) {
+                return middle;
+            } else if (weekStartDate.isAfter(weeksStartingDays.get(middle))) {
+                start = middle + 1;
+            } else {
+                end = middle - 1;
+            }
+        }
+        return start;
     }
 
     private Meeting searchNextMeeting(List<LocalDate> weeksStartList, int index, LocalDateTime now) {
@@ -169,6 +131,7 @@ public class MeetingDataAccessService implements MeetingDao {
         return null;
     }
 
+    /*
     @Override
     public List<Meeting> selectAllMeetings() {
         List<Meeting> meetingsList = new ArrayList<>();
@@ -177,4 +140,6 @@ public class MeetingDataAccessService implements MeetingDao {
         }
         return meetingsList;
     }
+
+     */
 }

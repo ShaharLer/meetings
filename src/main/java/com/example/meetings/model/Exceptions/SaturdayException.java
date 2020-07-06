@@ -1,10 +1,10 @@
 package com.example.meetings.model.Exceptions;
 
-import com.example.meetings.model.Constants.ExceptionsConstants;
-
 public class SaturdayException extends MeetingInvalidException {
 
+    private static final String MEETING_ON_SATURDAY_ERROR = "A meeting cannot be set to Saturday";
+
     public SaturdayException() {
-        super(ExceptionsConstants.getMeetingOnSaturdayError());
+        super(MEETING_ON_SATURDAY_ERROR);
     }
 }

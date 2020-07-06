@@ -1,10 +1,10 @@
 package com.example.meetings.model.Exceptions;
 
-import com.example.meetings.model.Constants.ExceptionsConstants;
-
 public class CrossDaysException extends MeetingInvalidException {
 
+    private static final String MEETING_CROSS_DAYS_ERROR = "A meeting must start and finish on the same day";
+
     public CrossDaysException() {
-        super(ExceptionsConstants.getCrossDaysError());
+        super(MEETING_CROSS_DAYS_ERROR);
     }
 }
