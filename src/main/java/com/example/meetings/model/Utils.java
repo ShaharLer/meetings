@@ -8,6 +8,7 @@ import java.time.temporal.TemporalAdjusters;
 
 public class Utils {
 
+    /*
     public static boolean isStartEndTimesValid(Meeting meeting) {
         LocalDateTime fromTime = meeting.getFromTime();
         LocalDateTime toTime = meeting.getToTime();
@@ -35,13 +36,7 @@ public class Utils {
         return weekStartDate;
     }
 
-    public static int updateTotalWeekMeetingsInMinutes(int totalWeekMeetingsInMinutes, Meeting meeting) {
-        return (totalWeekMeetingsInMinutes + getMeetingDurationInMinutes(meeting));
-    }
-
-    private static int getMeetingDurationInMinutes(Meeting meeting) {
-        return (int) Duration.between(meeting.getFromTime(), meeting.getToTime()).toMinutes();
-    }
+     */
 
     public static boolean meetingsOnTheSameDay(Meeting firstMeeting, Meeting secondMeeting) {
         LocalDate firstMeetingDate = firstMeeting.getFromTime().toLocalDate();

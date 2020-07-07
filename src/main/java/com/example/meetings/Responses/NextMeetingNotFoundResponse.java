@@ -1,4 +1,4 @@
-package com.example.meetings.model.Responses;
+package com.example.meetings.Responses;
 
 public class NextMeetingNotFoundResponse extends Response {
 

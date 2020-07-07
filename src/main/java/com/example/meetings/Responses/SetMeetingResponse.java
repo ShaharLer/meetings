@@ -1,7 +1,10 @@
-package com.example.meetings.model.Responses;
+package com.example.meetings.Responses;
 
 import com.example.meetings.model.Meeting;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
+@ResponseStatus(code = HttpStatus.CREATED)
 public class SetMeetingResponse extends Response {
 
     private static final String ADDED_MEETING_MESSAGE = "Meeting was set successfully";

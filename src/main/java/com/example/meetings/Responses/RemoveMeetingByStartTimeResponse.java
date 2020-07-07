@@ -1,4 +1,4 @@
-package com.example.meetings.model.Responses;
+package com.example.meetings.Responses;
 
 import com.example.meetings.model.MeetingConstants;
 import com.example.meetings.model.Meeting;
@@ -12,7 +12,7 @@ public class RemoveMeetingByStartTimeResponse extends Response {
 
     public RemoveMeetingByStartTimeResponse(Meeting deletedMeeting) {
         super(String.format(DELETED_MEETING_BY_FROM_TIME_MESSAGE,
-                deletedMeeting.getFromTime().format(DateTimeFormatter.ofPattern(MeetingConstants.getMeetingTimePattern()))));
+                deletedMeeting.getFromTime().format(DateTimeFormatter.ofPattern(MeetingConstants.MEETING_TIME_PATTERN))));
         this.deletedMeeting = deletedMeeting;
     }
 

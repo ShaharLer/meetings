@@ -1,4 +1,4 @@
-package com.example.meetings.model.Exceptions;
+package com.example.meetings.Exceptions;
 
 import com.example.meetings.model.MeetingConstants;
 
@@ -11,6 +11,6 @@ public class MeetingNotFoundByTimeException extends RuntimeException {
 
     public MeetingNotFoundByTimeException(LocalDateTime fromTime) {
         super(String.format(MEETING_NOT_FOUND_BY_FROM_TIME_ERROR,
-                fromTime.format(DateTimeFormatter.ofPattern(MeetingConstants.getMeetingTimePattern()))));
+                fromTime.format(DateTimeFormatter.ofPattern(MeetingConstants.MEETING_TIME_PATTERN))));
     }
 }

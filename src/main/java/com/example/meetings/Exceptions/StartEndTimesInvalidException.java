@@ -1,4 +1,4 @@
-package com.example.meetings.model.Exceptions;
+package com.example.meetings.Exceptions;
 
 public class StartEndTimesInvalidException extends MeetingInvalidException {
 

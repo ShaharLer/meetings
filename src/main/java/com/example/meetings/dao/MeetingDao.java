@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface MeetingDao {
 
-   List<Meeting> getWeeklyMeetings(Meeting meeting);
+   List<Meeting> getSameWeekMeetings(Meeting meeting);
 
    boolean setMeeting(Meeting meeting);
 
@@ -17,5 +17,5 @@ public interface MeetingDao {
 
    Meeting getNextMeeting();
 
-//   List<Meeting> selectAllMeetings();
+   List<Meeting> selectAllMeetings();
 }
