@@ -19,6 +19,12 @@ public class Meeting {
     public Meeting() {
     }
 
+    public Meeting(LocalDateTime fromTime, LocalDateTime toTime, String meetingTitle) {
+        this.fromTime = fromTime;
+        this.toTime = toTime;
+        this.meetingTitle = meetingTitle;
+    }
+
     public LocalDateTime getFromTime() {
         return fromTime;
     }

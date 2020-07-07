@@ -4,7 +4,7 @@ import com.example.meetings.model.Meeting;
 
 public class FoundNextMeetingResponse extends Response {
 
-    private static final String FOUND_NEXT_MEETING_MESSAGE = "The next meeting is:";
+    public static final String FOUND_NEXT_MEETING_MESSAGE = "The next meeting is:";
     private Meeting meeting;
 
     public FoundNextMeetingResponse(Meeting meeting) {

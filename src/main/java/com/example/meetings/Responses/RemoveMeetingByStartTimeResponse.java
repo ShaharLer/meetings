@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 
 public class RemoveMeetingByStartTimeResponse extends Response {
 
-    private static final String DELETED_MEETING_BY_FROM_TIME_MESSAGE = "The meeting that starts at (%s) was deleted successfully";
+    public static final String DELETED_MEETING_BY_FROM_TIME_MESSAGE = "The meeting that starts at (%s) was deleted successfully";
     private Meeting deletedMeeting;
 
     public RemoveMeetingByStartTimeResponse(Meeting deletedMeeting) {

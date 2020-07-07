@@ -6,7 +6,7 @@ import java.util.List;
 
 public class RemoveMeetingByTitleResponse extends Response {
 
-    private static final String DELETED_MEETINGS_BY_TITLE_MESSAGE = "The meetings with title \"%s\" were deleted successfully";
+    public static final String DELETED_MEETINGS_BY_TITLE_MESSAGE = "The meetings with title '%s' were deleted successfully";
     private List<Meeting> deletedMeetings;
 
     public RemoveMeetingByTitleResponse(String meetingsTitle, List<Meeting> deletedMeetings) {

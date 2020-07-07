@@ -116,7 +116,10 @@ public class MeetingService {
         return meetingDao.getNextMeeting();
     }
 
+    /*
     public List<Meeting> getAllMeetings() {
         return meetingDao.selectAllMeetings();
     }
+
+     */
 }

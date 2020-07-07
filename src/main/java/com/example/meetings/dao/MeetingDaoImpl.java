@@ -187,6 +187,7 @@ public class MeetingDaoImpl implements MeetingDao {
         return weekStartDate;
     }
 
+    /*
     @Override
     public List<Meeting> selectAllMeetings() {
         List<Meeting> meetingsList = new ArrayList<>();
@@ -195,4 +196,6 @@ public class MeetingDaoImpl implements MeetingDao {
         }
         return meetingsList;
     }
+
+     */
 }

@@ -17,5 +17,5 @@ public interface MeetingDao {
 
    Meeting getNextMeeting();
 
-   List<Meeting> selectAllMeetings();
+//   List<Meeting> selectAllMeetings();
 }

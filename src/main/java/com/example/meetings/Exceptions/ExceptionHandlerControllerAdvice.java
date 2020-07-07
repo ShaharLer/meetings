@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class ExceptionHandlerControllerAdvice {
 
-    @ExceptionHandler(MeetingInvalidException.class)
+    @ExceptionHandler({MeetingInvalidException.class, MeetingNotFoundByTimeException.class, MeetingNotFoundByTitleException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public @ResponseBody ExceptionResponse handleInvalidMeeting(final MeetingInvalidException exception,
                                                                               final HttpServletRequest request) {
