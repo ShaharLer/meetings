@@ -23,10 +23,7 @@ public class MeetingService {
 
     public Meeting setMeeting(Meeting meeting) {
         verifyMeetingIsValid(meeting);
-        if (meetingDao.setMeeting(meeting)) {
-            return meeting;
-        };
-        return null;
+        return meetingDao.setMeeting(meeting);
     }
 
     private void verifyMeetingIsValid(Meeting meeting) {
@@ -115,11 +112,4 @@ public class MeetingService {
     public Meeting getNextMeeting() {
         return meetingDao.getNextMeeting();
     }
-
-    /*
-    public List<Meeting> getAllMeetings() {
-        return meetingDao.selectAllMeetings();
-    }
-
-     */
 }

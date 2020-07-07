@@ -13,8 +13,8 @@ public class ExceptionHandlerControllerAdvice {
 
     @ExceptionHandler({MeetingInvalidException.class, MeetingNotFoundByTimeException.class, MeetingNotFoundByTitleException.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public @ResponseBody ExceptionResponse handleInvalidMeeting(final MeetingInvalidException exception,
-                                                                              final HttpServletRequest request) {
+    public @ResponseBody ExceptionResponse handleInvalidMeeting(final Exception exception,
+                                                                final HttpServletRequest request) {
 
         return new ExceptionResponse(exception.getMessage(), request.getRequestURI());
     }
@@ -22,7 +22,7 @@ public class ExceptionHandlerControllerAdvice {
     @ExceptionHandler({DbException.class, VariableInvalidException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     public @ResponseBody ExceptionResponse handleInternalServerErrors(final Exception exception,
-                                                           final HttpServletRequest request) {
+                                                                      final HttpServletRequest request) {
 
         return new ExceptionResponse(exception.getMessage(), request.getRequestURI());
     }

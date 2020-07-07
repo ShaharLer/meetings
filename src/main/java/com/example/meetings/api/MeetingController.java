@@ -48,14 +48,4 @@ public class MeetingController {
         }
         return new FoundNextMeetingResponse(nextMeeting);
     }
-
-    // TODO delete that
-    /*
-    @GetMapping("/all")
-    public List<Meeting> getAllMeetings() {
-        List<Meeting> allMeetings = meetingService.getAllMeetings();
-        return allMeetings;
-    }
-
-     */
 }
